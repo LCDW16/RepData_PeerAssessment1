@@ -104,7 +104,7 @@ print(diff_median)
 #### The mean and median based on the data, where NAs are replaced by mean are larger than the mean and median based on original data.
 
 
-#Are there differences in activity patterns between weekdays and weekends?
+# Are there differences in activity patterns between weekdays and weekends?
 
 ```{r}
 ## setlocale
