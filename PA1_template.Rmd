@@ -1,103 +1,117 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
+title: 'Reproducible Research: Peer Assessment 1'
+output:
   html_document:
-    keep_md: true
+    keep_md: yes
+  word_document: default
 ---
 
 
 # Loading and preprocessing the data
 
+#### Read data
 ```{r, echo = TRUE}
-# read data
 setwd("D:/Course5_wk2_assignment")
 activity_data <- read.csv("./activity.csv")
 str(activity_data)
+```
 
-# Transform date from Factor to Date class 
+#### Transform date from Factor to Date class 
+```{r, echo = TRUE}
 activity_data$date <- as.Date(activity_data$date, format = "%Y-%m-%d")
 ```
 
 # What is mean total number of steps taken per day?
+
+#### Calculate steps per day
 ```{r, echo = TRUE}
 steps_per_day  <- tapply(activity_data$steps, activity_data$date, sum, na.rm= TRUE)
+```
 
-# make histogram
+#### Make a histogram of the total number of steps taken each day
+```{r, echo = TRUE}
 hist(steps_per_day, col = "red", breaks=20, xlab = "total steps per day", main ="Histogram total number of steps per day" )
+```
 
-# calculate and report mean and median of the total number of steps taken per day
+#### Calculate and report mean and median of the total number of steps taken per day
+```{r, echo = TRUE}
 mean_per_day  <- round(mean(steps_per_day, na.rm = TRUE))
 median_per_day  <- round(median(steps_per_day, na.rm = TRUE))
 
-# mean of total number of steps per day
 print(mean_per_day)
 
-# median of total number of steps per day
 print(median_per_day)
 
 ```
 
 # What is the average daily activity pattern?
-```{r}
-# calculate average steps
-average_steps <- aggregate(activity_data$steps, list(interval=activity_data$interval), mean, na.rm = TRUE)
-     
-# make plot
-plot(average_steps, type = "l", col = "red", main = "average number of steps of the 5-minute interval", xlab = "5-minute interval", ylab = "average number of steps")
 
-# the 5-minute interval with the maximum number of steps
+#### Calculate average steps
+```{r,echo = TRUE}
+average_steps <- aggregate(activity_data$steps, list(interval=activity_data$interval), mean, na.rm = TRUE)
+```
+ 
+#### Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)  
+
+```{r,echo = TRUE}     
+plot(average_steps, type = "l", col = "red", main = "average number of steps of the 5-minute interval", xlab = "5-minute interval", ylab = "average number of steps")
+```
+
+#### Determine the 5-minute interval with the maximum number of steps
+```{r,echo = TRUE}
 max_steps <- max(average_steps$x)
 max_interval <- average_steps[which(average_steps$x == max_steps),1]
 
-# interval with maximum number of steps
 print(max_interval)
 
 ```
 
 # Imputing missing values
-```{r}
-# Calculate and report the total number of missing values in the dataset 
+
+#### Calculate and report the total number of missing values in the dataset
+```{r, echo = TRUE}
 total_NA <- sum(is.na(activity_data))
 
-# number of missing values in the dataset
 print(total_NA)
+```
 
-# create a new dataset which is a copy of the original dataset
+#### Create a new dataset which is a copy of the original dataset
+```{r, echo = TRUE}
 activity_data_nw <- activity_data
+```
 
-# replace NA with the average of the interval.
+#### Replace NA with the average of the interval.
+```{r, echo = TRUE}
 activity_data_nw$steps[which(is.na(activity_data_nw$steps))] = rep(average_steps$x, 288)[which(is.na(activity_data_nw$steps))]
+```
 
-# create a new dataset which is a copy of the original dataset
-activity_data_nw <- activity_data
-
-# replace NA with the average of the interval.
-activity_data_nw$steps[which(is.na(activity_data_nw$steps))] = rep(average_steps$x, 288)[which(is.na(activity_data_nw$steps))]
-
-# calculate total number of steps per day fot the new data
+####  Calculate total number of steps per day fot the new data
+```{r, echo = TRUE}
 steps_per_day_nw  <- tapply(activity_data_nw$steps, activity_data_nw$date, sum, na.rm= TRUE)
+```
 
-# make a histogram of the new data
+#### Make a histogram of the total number of steps taken each day of the new data
+```{r, echo = TRUE}
 hist(steps_per_day_nw, col = "red", breaks=20, xlab = "total steps per day", main ="Histogram of total number of steps per day (NA replaced by mean)" )
+```
 
-# calculate the mean and median of the new data
+#### Calculate the mean and median of the new data
+```{r, echo = TRUE}
 mean_per_day_nw  <- mean(steps_per_day_nw, na.rm = TRUE)
 median_per_day_nw  <- median(steps_per_day_nw, na.rm = TRUE)
 
-# mean of total number of steps per day of the data NA replaced by mean
 print(mean_per_day_nw)
 
-# median of total number of steps per day of the data NA replaced by mean
 print(median_per_day_nw)
+```
 
-# calculate the differences
+#### Calculate the differences between mean and median based on the new and old data
+```{r, echo = TRUE}
 diff_mean <- mean_per_day_nw - mean_per_day
 diff_median <- median_per_day_nw - median_per_day
 
-# difference between the both means
 print(diff_mean)
 
-# difference between the both medians
 print(diff_median)
 ```
 
@@ -106,21 +120,25 @@ print(diff_median)
 
 # Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+#### define weekdays 
+```{r, echo= TRUE}
 ## setlocale
 Sys.setlocale("LC_TIME", "English")
 
 days <- weekdays(activity_data_nw$date)
 activity_data_days <- cbind(activity_data_nw, days)
 
-# define weekdays    
 week_day <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 activity_data_days$dayType = ifelse(days %in% week_day, "weekday", "weekend")
+```
 
-# calculate average steps for weekdays and weekends
+#### Calculate average steps for weekdays and weekends
+```{r, echo= TRUE}
 average_steps <- aggregate(activity_data_days$steps, list(interval=activity_data_days$interval, dayType = activity_data_days$dayType), mean, na.rm = TRUE)
+```
 
-# make plot
+#### Make a panel plot containing a time series plot of the 5-minute interval and the average number of steps taken, averaged across all weekday days or weekend days
+```{r, echo= TRUE}
 library(ggplot2)
 g <- ggplot(average_steps, aes(interval, x))
 g <- g + facet_grid(dayType~.)
